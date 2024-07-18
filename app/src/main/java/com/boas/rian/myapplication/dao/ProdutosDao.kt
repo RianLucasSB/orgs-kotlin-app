@@ -1,6 +1,7 @@
 package com.boas.rian.myapplication.dao
 
 import com.boas.rian.myapplication.model.Produto
+import java.math.BigDecimal
 
 class ProdutosDao {
 
@@ -13,6 +14,8 @@ class ProdutosDao {
     }
 
     companion object {
-        private val produtos = mutableListOf<Produto>()
+        private val produtos = mutableListOf<Produto>(
+            Produto("Cuzcuz", "Flocão", BigDecimal("2.99"))
+        )
     }
 }
