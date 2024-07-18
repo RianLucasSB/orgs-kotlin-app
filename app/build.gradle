@@ -7,6 +7,10 @@ android {
     namespace 'com.boas.rian.myapplication'
     compileSdk 34
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     defaultConfig {
         applicationId "com.boas.rian.myapplication"
         minSdk 22
