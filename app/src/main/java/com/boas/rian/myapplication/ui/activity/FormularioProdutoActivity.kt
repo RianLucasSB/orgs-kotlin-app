@@ -1,24 +1,34 @@
 package com.boas.rian.myapplication.ui.activity
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
+import android.util.Log
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.boas.rian.myapplication.R
 import com.boas.rian.myapplication.dao.ProdutosDao
 import com.boas.rian.myapplication.databinding.ActivityFormularioProdutoBinding
+import com.boas.rian.myapplication.extensions.tentaCarregar
 import com.boas.rian.myapplication.model.Produto
+import com.boas.rian.myapplication.ui.dialog.FormularioImagemDialog
 import java.math.BigDecimal
 
 class FormularioProdutoActivity : AppCompatActivity() {
     val dao = ProdutosDao()
     private lateinit var binding: ActivityFormularioProdutoBinding
+    var url: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFormularioProdutoBinding.inflate(layoutInflater)
         setContentView(binding.root)
         configuraBotaoSalvar()
+        binding.activityFormularioProdutoImagem.setOnClickListener {
+            FormularioImagemDialog(this).mostra(url) {
+                url = it
+                binding.activityFormularioProdutoImagem.tentaCarregar(url)
+            }
+        }
+
     }
 
     private fun configuraBotaoSalvar() {
@@ -46,6 +56,6 @@ class FormularioProdutoActivity : AppCompatActivity() {
             BigDecimal(valorEmTexto)
         }
 
-        return Produto(nome, descricao, valor)
+        return Produto(nome, descricao, valor, url)
     }
 }

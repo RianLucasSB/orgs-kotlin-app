@@ -4,29 +4,58 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.boas.rian.myapplication.R
-import com.boas.rian.myapplication.databinding.ActivityListaProdutosBinding
+import coil.load
 import com.boas.rian.myapplication.databinding.ProdutoItemBinding
+import com.boas.rian.myapplication.extensions.tentaCarregar
 import com.boas.rian.myapplication.model.Produto
+import java.text.NumberFormat
+import java.util.*
 
 class ListaProdutosAdapter(
     private val context: Context,
-    produtos: List<Produto>
+    produtos: List<Produto>,
+    var onClickItemListener: (produto: Produto) -> Unit = {}
 ) : RecyclerView.Adapter<ListaProdutosAdapter.ViewHolder>() {
 
     private var produtos = produtos.toMutableList()
 
-    class ViewHolder(binding: ProdutoItemBinding): RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(binding: ProdutoItemBinding) : RecyclerView.ViewHolder(binding.root) {
         val nome = binding.produtoItemNome
         val descricao = binding.produtoItemDescricao
         val valor = binding.produtoItemValor
+        val imagem = binding.imageView
 
-        fun vincula(produto: Produto){
+        private lateinit var produto: Produto
+
+        init {
+            itemView.setOnClickListener {
+                if(::produto.isInitialized){
+                    onClickItemListener(produto)
+                }
+            }
+        }
+
+
+        fun vincula(produto: Produto) {
+            this.produto = produto
+
             nome.text = produto.nome
             descricao.text = produto.descricao
-            valor.text = produto.valor.toPlainString()
+            val formatador = NumberFormat.getCurrencyInstance(Locale("pt", "br"))
+            val valorEmReal = formatador.format(produto.valor)
+            valor.text = valorEmReal
+
+            val visibilidade = if (produto.imagem != null){
+                View.VISIBLE
+            } else{
+                View.GONE
+            }
+
+            imagem.visibility = visibilidade
+
+            imagem.tentaCarregar(produto.imagem)
+
         }
     }
 

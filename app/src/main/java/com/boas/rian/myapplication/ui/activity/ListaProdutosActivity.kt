@@ -2,13 +2,11 @@ package com.boas.rian.myapplication.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
-import com.boas.rian.myapplication.R
 import com.boas.rian.myapplication.dao.ProdutosDao
 import com.boas.rian.myapplication.databinding.ActivityListaProdutosBinding
 import com.boas.rian.myapplication.ui.recyclerview.adapter.ListaProdutosAdapter
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class ListaProdutosActivity : AppCompatActivity() {
 
@@ -41,5 +39,10 @@ class ListaProdutosActivity : AppCompatActivity() {
     private fun configuraRecyclerView() {
         val recyclerView = binding.recyclerView
         recyclerView.adapter = adapter
+        adapter.onClickItemListener = {
+            val intent = Intent(this, DetalhesProdutoActivity::class.java)
+            intent.putExtra("produto", it)
+            startActivity(intent)
+        }
     }
 }
