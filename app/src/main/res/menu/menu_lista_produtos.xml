@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <group
+        android:checkableBehavior="single"
+        android:visible="true">
+        <item
+            android:id="@+id/menu_lista_produto_ordenar_preco_asc"
+            android:icon="@drawable/ic_action_editar"
+            android:title="Preço asc" />
+        <item
+            android:id="@+id/menu_lista_produto_ordenar_preco_desc"
+            android:title="Preço desc" />
+        <item
+            android:id="@+id/menu_lista_produto_ordenar_nome_asc"
+            android:title="Nome asc" />
+        <item
+            android:id="@+id/menu_lista_produto_ordenar_nome_desc"
+            android:title="Nome desc" />
+        <item
+            android:id="@+id/menu_lista_produto_ordenar_nenhum"
+            android:checked="true"
+            android:title="Nenhum" />
+    </group>
+</menu>

@@ -1,11 +1,8 @@
 package com.boas.rian.myapplication.ui.activity
 
 import android.os.Bundle
-import android.util.Log
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.boas.rian.myapplication.R
-import com.boas.rian.myapplication.dao.ProdutosDao
+import com.boas.rian.myapplication.database.AppDatabase
 import com.boas.rian.myapplication.databinding.ActivityFormularioProdutoBinding
 import com.boas.rian.myapplication.extensions.tentaCarregar
 import com.boas.rian.myapplication.model.Produto
@@ -13,9 +10,13 @@ import com.boas.rian.myapplication.ui.dialog.FormularioImagemDialog
 import java.math.BigDecimal
 
 class FormularioProdutoActivity : AppCompatActivity() {
-    val dao = ProdutosDao()
+
     private lateinit var binding: ActivityFormularioProdutoBinding
+    private val produtoDao by lazy {
+        AppDatabase.instancia(this).produtoDao()
+    }
     var url: String? = null
+    var produtoId = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +29,23 @@ class FormularioProdutoActivity : AppCompatActivity() {
                 binding.activityFormularioProdutoImagem.tentaCarregar(url)
             }
         }
+        produtoId = intent.getLongExtra(CHAVE_PRODUTO_ID, 0L)
 
+        produtoDao.buscaPorId(produtoId)?.let {
+            preencheCampos(it)
+            title = "Editar produto"
+        }
+    }
+
+    private fun preencheCampos(produto: Produto) {
+        with(binding) {
+            url = produto.imagem
+            activityFormularioProdutoImagem.tentaCarregar(produto.imagem)
+            activityFormularioProdutoNome.setText(produto.nome)
+            activityFormularioProdutoDescricao.setText(produto.descricao)
+            activityFormularioProdutoValor.setText(produto.valor.toPlainString())
+
+        }
     }
 
     private fun configuraBotaoSalvar() {
@@ -37,7 +54,7 @@ class FormularioProdutoActivity : AppCompatActivity() {
         botao.setOnClickListener {
             val produto = criaProduto()
 
-            dao.adiciona(produto)
+            produtoDao.salvaTodos(produto)
             finish()
         }
     }
@@ -56,6 +73,8 @@ class FormularioProdutoActivity : AppCompatActivity() {
             BigDecimal(valorEmTexto)
         }
 
-        return Produto(nome, descricao, valor, url)
+        return Produto(
+            id = produtoId, nome = nome, descricao = descricao, valor = valor, imagem = url
+        )
     }
 }

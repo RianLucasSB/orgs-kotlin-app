@@ -2,17 +2,24 @@ package com.boas.rian.myapplication.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import com.boas.rian.myapplication.dao.ProdutosDao
+import com.boas.rian.myapplication.R
+import com.boas.rian.myapplication.database.AppDatabase
 import com.boas.rian.myapplication.databinding.ActivityListaProdutosBinding
+import com.boas.rian.myapplication.model.Produto
 import com.boas.rian.myapplication.ui.recyclerview.adapter.ListaProdutosAdapter
 
 class ListaProdutosActivity : AppCompatActivity() {
 
-    private val dao = ProdutosDao()
-    private val adapter = ListaProdutosAdapter(this, dao.buscaTodos())
+    private val adapter = ListaProdutosAdapter(this)
     private lateinit var binding: ActivityListaProdutosBinding
+    private var ordenacaoSelecionada = OrdernarProdutoEnum.NENHUM
+
+    private val produtosDao by lazy {
+        AppDatabase.instancia(this).produtoDao()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +31,56 @@ class ListaProdutosActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        adapter.atualiza(dao.buscaTodos())
+        when(ordenacaoSelecionada){
+            OrdernarProdutoEnum.NENHUM -> {
+                buscaTodosProdutos(produtosDao.buscaTodos())
+            }
+            else -> ordenaProdutos(ordenacaoSelecionada)
+        }
+    }
+
+    private fun buscaTodosProdutos(produtos: List<Produto>) {
+        adapter.atualiza(produtos)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_lista_produtos, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menu_lista_produto_ordenar_preco_asc -> {
+                ordenaProdutos(OrdernarProdutoEnum.VALOR_ASC)
+                item.isChecked = !item.isChecked
+            }
+            R.id.menu_lista_produto_ordenar_preco_desc -> {
+                ordenaProdutos(OrdernarProdutoEnum.VALOR_DESC)
+                item.isChecked = !item.isChecked
+            }
+            R.id.menu_lista_produto_ordenar_nome_asc -> {
+                ordenaProdutos(OrdernarProdutoEnum.NOME_ASC)
+                item.isChecked = !item.isChecked
+            }
+            R.id.menu_lista_produto_ordenar_nome_desc -> {
+                ordenaProdutos(OrdernarProdutoEnum.NOME_DESC)
+                item.isChecked = !item.isChecked
+            }
+            R.id.menu_lista_produto_ordenar_nenhum -> {
+                buscaTodosProdutos(produtosDao.buscaTodos())
+                ordenacaoSelecionada = OrdernarProdutoEnum.NENHUM
+                item.isChecked = !item.isChecked
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun ordenaProdutos(value: OrdernarProdutoEnum) {
+        ordenacaoSelecionada = value
+        val column = value.getString().split("-")[0]
+        val orderClause = value.getString().split("-")[1]
+
+        buscaTodosProdutos(produtosDao.buscaProdutosOrderByAndOrderClause(column, orderClause))
     }
 
     private fun configuraFab() {
@@ -40,8 +96,11 @@ class ListaProdutosActivity : AppCompatActivity() {
         val recyclerView = binding.recyclerView
         recyclerView.adapter = adapter
         adapter.onClickItemListener = {
-            val intent = Intent(this, DetalhesProdutoActivity::class.java)
-            intent.putExtra("produto", it)
+            val intent = Intent(
+                this, DetalhesProdutoActivity::class.java
+            ).apply {
+                putExtra(CHAVE_PRODUTO_ID, it.id)
+            }
             startActivity(intent)
         }
     }
