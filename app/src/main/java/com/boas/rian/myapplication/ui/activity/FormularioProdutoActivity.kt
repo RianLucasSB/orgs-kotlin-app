@@ -2,11 +2,13 @@ package com.boas.rian.myapplication.ui.activity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.boas.rian.myapplication.database.AppDatabase
 import com.boas.rian.myapplication.databinding.ActivityFormularioProdutoBinding
 import com.boas.rian.myapplication.extensions.tentaCarregar
 import com.boas.rian.myapplication.model.Produto
 import com.boas.rian.myapplication.ui.dialog.FormularioImagemDialog
+import kotlinx.coroutines.launch
 import java.math.BigDecimal
 
 class FormularioProdutoActivity : AppCompatActivity() {
@@ -31,9 +33,11 @@ class FormularioProdutoActivity : AppCompatActivity() {
         }
         produtoId = intent.getLongExtra(CHAVE_PRODUTO_ID, 0L)
 
-        produtoDao.buscaPorId(produtoId)?.let {
-            preencheCampos(it)
-            title = "Editar produto"
+        lifecycleScope.launch {
+            produtoDao.buscaPorId(produtoId)?.let {
+                title = "Alterar produto"
+                preencheCampos(it)
+            }
         }
     }
 
@@ -54,8 +58,10 @@ class FormularioProdutoActivity : AppCompatActivity() {
         botao.setOnClickListener {
             val produto = criaProduto()
 
-            produtoDao.salvaTodos(produto)
-            finish()
+            lifecycleScope.launch {
+                produtoDao.salvaTodos(produto)
+                finish()
+            }
         }
     }
 

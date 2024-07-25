@@ -2,19 +2,18 @@ package com.boas.rian.myapplication.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.IntentCompat
+import androidx.lifecycle.lifecycleScope
 import com.boas.rian.myapplication.R
 import com.boas.rian.myapplication.database.AppDatabase
 import com.boas.rian.myapplication.databinding.ActivityDetalhesProdutoBinding
 import com.boas.rian.myapplication.extensions.tentaCarregar
 import com.boas.rian.myapplication.model.Produto
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.*
-import kotlin.properties.Delegates
 
 class DetalhesProdutoActivity : AppCompatActivity() {
     private var produto: Produto? = null
@@ -22,7 +21,7 @@ class DetalhesProdutoActivity : AppCompatActivity() {
     private val binding: ActivityDetalhesProdutoBinding by lazy {
         ActivityDetalhesProdutoBinding.inflate(layoutInflater)
     }
-    private val productDao by lazy {
+    private val produtoDao by lazy {
         AppDatabase.instancia(this).produtoDao()
     }
 
@@ -34,10 +33,12 @@ class DetalhesProdutoActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        produto = productDao.buscaPorId(produtoId)
-        produto?.let {
-            preencheProduto(it)
-        } ?: finish()
+        lifecycleScope.launch {
+            produto = produtoDao.buscaPorId(produtoId)
+            produto?.let {
+                preencheProduto(it)
+            } ?: finish()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -54,10 +55,10 @@ class DetalhesProdutoActivity : AppCompatActivity() {
                 }
             }
             R.id.menu_detalhes_produto_remover -> {
-                produto?.let {
-                    productDao.remove(it)
+                lifecycleScope.launch {
+                    produto?.let { produtoDao.remove(it) }
+                    finish()
                 }
-                finish()
             }
         }
         return super.onOptionsItemSelected(item)

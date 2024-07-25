@@ -5,11 +5,12 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.boas.rian.myapplication.R
 import com.boas.rian.myapplication.database.AppDatabase
 import com.boas.rian.myapplication.databinding.ActivityListaProdutosBinding
-import com.boas.rian.myapplication.model.Produto
 import com.boas.rian.myapplication.ui.recyclerview.adapter.ListaProdutosAdapter
+import kotlinx.coroutines.launch
 
 class ListaProdutosActivity : AppCompatActivity() {
 
@@ -31,17 +32,18 @@ class ListaProdutosActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        when(ordenacaoSelecionada){
+        when (ordenacaoSelecionada) {
             OrdernarProdutoEnum.NENHUM -> {
-                buscaTodosProdutos(produtosDao.buscaTodos())
+                lifecycleScope.launch {
+                    produtosDao.buscaTodos().collect {
+                        adapter.atualiza(it)
+                    }
+                }
             }
             else -> ordenaProdutos(ordenacaoSelecionada)
         }
     }
 
-    private fun buscaTodosProdutos(produtos: List<Produto>) {
-        adapter.atualiza(produtos)
-    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_lista_produtos, menu)
@@ -67,7 +69,11 @@ class ListaProdutosActivity : AppCompatActivity() {
                 item.isChecked = !item.isChecked
             }
             R.id.menu_lista_produto_ordenar_nenhum -> {
-                buscaTodosProdutos(produtosDao.buscaTodos())
+                lifecycleScope.launch {
+                    produtosDao.buscaTodos().collect {
+                        adapter.atualiza(it)
+                    }
+                }
                 ordenacaoSelecionada = OrdernarProdutoEnum.NENHUM
                 item.isChecked = !item.isChecked
             }
@@ -80,7 +86,11 @@ class ListaProdutosActivity : AppCompatActivity() {
         val column = value.getString().split("-")[0]
         val orderClause = value.getString().split("-")[1]
 
-        buscaTodosProdutos(produtosDao.buscaProdutosOrderByAndOrderClause(column, orderClause))
+        lifecycleScope.launch {
+            produtosDao.buscaProdutosOrderByAndOrderClause(column, orderClause).collect {
+                adapter.atualiza(it)
+            }
+        }
     }
 
     private fun configuraFab() {

@@ -5,26 +5,27 @@ import androidx.room.OnConflictStrategy.REPLACE
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.boas.rian.myapplication.model.Produto
+import kotlinx.coroutines.flow.Flow
 
 
 @Dao
 interface ProdutoDao {
     @Query("SELECT * from Produto")
-    fun buscaTodos(): List<Produto>
+    fun buscaTodos(): Flow<List<Produto>>
 
     @Insert(onConflict = REPLACE)
-    fun salvaTodos(vararg produto: Produto)
+    suspend fun salvaTodos(vararg produto: Produto)
 
     @Query("SELECT * from Produto WHERE id = :id")
-    fun buscaPorId(id: Long): Produto?
+    suspend fun buscaPorId(id: Long): Produto?
 
     @Delete
-    fun remove(produto: Produto)
+    suspend fun remove(produto: Produto)
 
-    @RawQuery
-    fun buscaTodosPorQuery(query: SupportSQLiteQuery?): List<Produto>
+    @RawQuery(observedEntities = [Produto::class])
+    fun buscaTodosPorQuery(query: SupportSQLiteQuery): Flow<List<Produto>>
 
-    fun buscaProdutosOrderByAndOrderClause(column: String, orderClause: String): List<Produto> {
+    fun buscaProdutosOrderByAndOrderClause(column: String, orderClause: String): Flow<List<Produto>> {
         val statement = "SELECT * FROM Produto ORDER BY $column ${orderClause.uppercase()}"
         val query: SupportSQLiteQuery = SimpleSQLiteQuery(statement, arrayOf())
         return buscaTodosPorQuery(query)
