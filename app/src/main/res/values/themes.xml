@@ -9,6 +9,7 @@
         <item name="colorSecondary">@color/colorSecondary</item>
         <item name="colorSecondaryVariant">@color/colorOnSecondary</item>
         <item name="colorOnSecondary">@color/colorOnSecondary</item>
+
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
@@ -20,5 +21,10 @@
     <style name="MyActionButtonOverflow" parent="android:style/Widget.Holo.Light.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_baseline_filter_list_24</item>
         <item name="android:contentDescription">"Filtrar"</item>
+    </style>
+
+    <style name="Theme.Orgs.NoActionBar" parent="Theme.Orgs">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 </resources>

@@ -7,12 +7,15 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.boas.rian.myapplication.database.converter.Converters
 import com.boas.rian.myapplication.database.dao.ProdutoDao
+import com.boas.rian.myapplication.database.dao.UsuarioDao
 import com.boas.rian.myapplication.model.Produto
+import com.boas.rian.myapplication.model.Usuario
 
-@Database(entities = [Produto::class], version = 1, exportSchema = false)
+@Database(entities = [Produto::class, Usuario::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun produtoDao(): ProdutoDao
+    abstract fun usuarioDao(): UsuarioDao
 
     companion object {
         @Volatile
@@ -20,6 +23,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         fun instancia(context: Context): AppDatabase{
             return db ?: Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, "orgs.db")
+                .addMigrations(MIGRATION_1_2)
                 .build()
                 .also { db = it }
         }

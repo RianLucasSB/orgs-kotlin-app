@@ -7,4 +7,6 @@
     <color name="colorSecondary">#43a047</color>
     <color name="colorSecondaryVariant">#76d275</color>
     <color name="colorOnSecondary">#ffffff</color>
+
+    <color name="warning">#FF0000</color>
 </resources>

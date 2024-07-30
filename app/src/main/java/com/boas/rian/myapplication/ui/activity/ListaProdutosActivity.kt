@@ -2,21 +2,26 @@ package com.boas.rian.myapplication.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.boas.rian.myapplication.R
 import com.boas.rian.myapplication.database.AppDatabase
 import com.boas.rian.myapplication.databinding.ActivityListaProdutosBinding
+import com.boas.rian.myapplication.extensions.vaiPara
 import com.boas.rian.myapplication.ui.recyclerview.adapter.ListaProdutosAdapter
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
-class ListaProdutosActivity : AppCompatActivity() {
+class ListaProdutosActivity : UsuarioBaseActivity() {
 
     private val adapter = ListaProdutosAdapter(this)
     private lateinit var binding: ActivityListaProdutosBinding
-    private var ordenacaoSelecionada = OrdernarProdutoEnum.NENHUM
+    private var _ordenacaoSelecionada = MutableStateFlow(OrdernarProdutoEnum.NENHUM)
+    val ordenacaoSelecionada: StateFlow<OrdernarProdutoEnum> = _ordenacaoSelecionada
 
     private val produtosDao by lazy {
         AppDatabase.instancia(this).produtoDao()
@@ -28,19 +33,30 @@ class ListaProdutosActivity : AppCompatActivity() {
         setContentView(binding.root)
         configuraRecyclerView()
         configuraFab()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        when (ordenacaoSelecionada) {
-            OrdernarProdutoEnum.NENHUM -> {
-                lifecycleScope.launch {
-                    produtosDao.buscaTodos().collect {
-                        adapter.atualiza(it)
-                    }
+        lifecycleScope.launch {
+            launch {
+                usuario.filterNotNull().collect {
+                    buscaProdutosUsuario()
                 }
             }
-            else -> ordenaProdutos(ordenacaoSelecionada)
+        }
+    }
+
+
+    private fun buscaProdutosUsuario() {
+        lifecycleScope.launch {
+            ordenacaoSelecionada.collect { ordernarProdutoEnum ->
+                when (ordernarProdutoEnum) {
+                    OrdernarProdutoEnum.NENHUM -> {
+                        lifecycleScope.launch {
+                            produtosDao.buscaTodos().collect {
+                                adapter.atualiza(it)
+                            }
+                        }
+                    }
+                    else -> ordenaProdutos()
+                }
+            }
         }
     }
 
@@ -53,38 +69,35 @@ class ListaProdutosActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_lista_produto_ordenar_preco_asc -> {
-                ordenaProdutos(OrdernarProdutoEnum.VALOR_ASC)
+                _ordenacaoSelecionada.value = OrdernarProdutoEnum.VALOR_ASC
                 item.isChecked = !item.isChecked
             }
             R.id.menu_lista_produto_ordenar_preco_desc -> {
-                ordenaProdutos(OrdernarProdutoEnum.VALOR_DESC)
+                _ordenacaoSelecionada.value = OrdernarProdutoEnum.VALOR_DESC
                 item.isChecked = !item.isChecked
             }
             R.id.menu_lista_produto_ordenar_nome_asc -> {
-                ordenaProdutos(OrdernarProdutoEnum.NOME_ASC)
+                _ordenacaoSelecionada.value = OrdernarProdutoEnum.NOME_ASC
                 item.isChecked = !item.isChecked
             }
             R.id.menu_lista_produto_ordenar_nome_desc -> {
-                ordenaProdutos(OrdernarProdutoEnum.NOME_DESC)
+                _ordenacaoSelecionada.value = OrdernarProdutoEnum.NOME_DESC
                 item.isChecked = !item.isChecked
             }
             R.id.menu_lista_produto_ordenar_nenhum -> {
-                lifecycleScope.launch {
-                    produtosDao.buscaTodos().collect {
-                        adapter.atualiza(it)
-                    }
-                }
-                ordenacaoSelecionada = OrdernarProdutoEnum.NENHUM
+                _ordenacaoSelecionada.value = OrdernarProdutoEnum.NENHUM
                 item.isChecked = !item.isChecked
+            }
+            R.id.menu_lista_produto_deslogar -> {
+                vaiPara(PerfilUsuarioActivity::class.java)
             }
         }
         return super.onOptionsItemSelected(item)
     }
 
-    private fun ordenaProdutos(value: OrdernarProdutoEnum) {
-        ordenacaoSelecionada = value
-        val column = value.getString().split("-")[0]
-        val orderClause = value.getString().split("-")[1]
+    private fun ordenaProdutos() {
+        val column = ordenacaoSelecionada.value.getString().split("-")[0]
+        val orderClause = ordenacaoSelecionada.value.getString().split("-")[1]
 
         lifecycleScope.launch {
             produtosDao.buscaProdutosOrderByAndOrderClause(column, orderClause).collect {

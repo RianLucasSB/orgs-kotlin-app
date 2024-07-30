@@ -17,6 +17,7 @@ class FormularioProdutoActivity : AppCompatActivity() {
     private val produtoDao by lazy {
         AppDatabase.instancia(this).produtoDao()
     }
+
     var url: String? = null
     var produtoId = 0L
 
