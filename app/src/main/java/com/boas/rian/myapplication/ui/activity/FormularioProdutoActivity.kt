@@ -11,7 +11,7 @@ import com.boas.rian.myapplication.ui.dialog.FormularioImagemDialog
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 
-class FormularioProdutoActivity : AppCompatActivity() {
+class FormularioProdutoActivity : UsuarioBaseActivity() {
 
     private lateinit var binding: ActivityFormularioProdutoBinding
     private val produtoDao by lazy {
@@ -57,16 +57,17 @@ class FormularioProdutoActivity : AppCompatActivity() {
         val botao = binding.activityFormularioProdutoBotaoSalvar
 
         botao.setOnClickListener {
-            val produto = criaProduto()
-
             lifecycleScope.launch {
-                produtoDao.salvaTodos(produto)
-                finish()
+                usuario.value?.let {
+                    val produto = criaProduto(it.id)
+                    produtoDao.salvaTodos(produto)
+                    finish()
+                }
             }
         }
     }
 
-    private fun criaProduto(): Produto {
+    private fun criaProduto(usuarioId: String): Produto {
         val campoNome = binding.activityFormularioProdutoNome
         val campoDescricao = binding.activityFormularioProdutoDescricao
         val campoValor = binding.activityFormularioProdutoValor
@@ -81,7 +82,12 @@ class FormularioProdutoActivity : AppCompatActivity() {
         }
 
         return Produto(
-            id = produtoId, nome = nome, descricao = descricao, valor = valor, imagem = url
+            id = produtoId,
+            nome = nome,
+            descricao = descricao,
+            valor = valor,
+            imagem = url,
+            usuarioId = usuarioId
         )
     }
 }

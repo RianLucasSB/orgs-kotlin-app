@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProdutoDao {
+    @Query("SELECT * from Produto WHERE usuarioId = :usuarioId")
+    fun buscaTodosPorUsuarioId(usuarioId: String): Flow<List<Produto>>
+
     @Query("SELECT * from Produto")
     fun buscaTodos(): Flow<List<Produto>>
 
@@ -25,9 +28,9 @@ interface ProdutoDao {
     @RawQuery(observedEntities = [Produto::class])
     fun buscaTodosPorQuery(query: SupportSQLiteQuery): Flow<List<Produto>>
 
-    fun buscaProdutosOrderByAndOrderClause(column: String, orderClause: String): Flow<List<Produto>> {
-        val statement = "SELECT * FROM Produto ORDER BY $column ${orderClause.uppercase()}"
-        val query: SupportSQLiteQuery = SimpleSQLiteQuery(statement, arrayOf())
+    fun buscaProdutosOrderByAndOrderClause(column: String, orderClause: String, usuarioId: String): Flow<List<Produto>> {
+        val statement = "SELECT * FROM Produto WHERE usuarioId = ? ORDER BY $column ${orderClause.uppercase()}"
+        val query: SupportSQLiteQuery = SimpleSQLiteQuery(statement, arrayOf(usuarioId))
         return buscaTodosPorQuery(query)
     }
 }

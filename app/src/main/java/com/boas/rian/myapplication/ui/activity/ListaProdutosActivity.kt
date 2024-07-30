@@ -2,7 +2,6 @@ package com.boas.rian.myapplication.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.lifecycle.lifecycleScope
@@ -36,25 +35,25 @@ class ListaProdutosActivity : UsuarioBaseActivity() {
         lifecycleScope.launch {
             launch {
                 usuario.filterNotNull().collect {
-                    buscaProdutosUsuario()
+                    buscaProdutosUsuario(it.id)
                 }
             }
         }
     }
 
 
-    private fun buscaProdutosUsuario() {
+    private fun buscaProdutosUsuario(usuarioId: String) {
         lifecycleScope.launch {
             ordenacaoSelecionada.collect { ordernarProdutoEnum ->
                 when (ordernarProdutoEnum) {
                     OrdernarProdutoEnum.NENHUM -> {
                         lifecycleScope.launch {
-                            produtosDao.buscaTodos().collect {
+                            produtosDao.buscaTodosPorUsuarioId(usuarioId).collect {
                                 adapter.atualiza(it)
                             }
                         }
                     }
-                    else -> ordenaProdutos()
+                    else -> ordenaProdutos(usuarioId)
                 }
             }
         }
@@ -91,16 +90,19 @@ class ListaProdutosActivity : UsuarioBaseActivity() {
             R.id.menu_lista_produto_deslogar -> {
                 vaiPara(PerfilUsuarioActivity::class.java)
             }
+            R.id.menu_lista_produto_todos_produtos -> {
+                vaiPara(ListaTodosProdutosActivity::class.java)
+            }
         }
         return super.onOptionsItemSelected(item)
     }
 
-    private fun ordenaProdutos() {
+    private fun ordenaProdutos(usuarioId: String) {
         val column = ordenacaoSelecionada.value.getString().split("-")[0]
         val orderClause = ordenacaoSelecionada.value.getString().split("-")[1]
 
         lifecycleScope.launch {
-            produtosDao.buscaProdutosOrderByAndOrderClause(column, orderClause).collect {
+            produtosDao.buscaProdutosOrderByAndOrderClause(column, orderClause, usuarioId).collect {
                 adapter.atualiza(it)
             }
         }

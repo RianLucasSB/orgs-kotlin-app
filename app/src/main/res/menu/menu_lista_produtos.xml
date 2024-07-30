@@ -1,30 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <group
-        android:checkableBehavior="single"
-        android:visible="true">
-        <item
-            android:id="@+id/menu_lista_produto_ordenar_preco_asc"
-            android:icon="@drawable/ic_action_editar"
-            android:title="Preço asc" />
-        <item
-            android:id="@+id/menu_lista_produto_ordenar_preco_desc"
-            android:title="Preço desc" />
-        <item
-            android:id="@+id/menu_lista_produto_ordenar_nome_asc"
-            android:title="Nome asc" />
-        <item
-            android:id="@+id/menu_lista_produto_ordenar_nome_desc"
-            android:title="Nome desc" />
-        <item
-            android:id="@+id/menu_lista_produto_ordenar_nenhum"
-            android:checked="true"
-            android:title="Nenhum" />
-    </group>
+
+
     <item
         android:id="@+id/menu_lista_produto_deslogar"
         android:icon="@drawable/ic_action_perfil"
-        app:showAsAction="ifRoom"
-        android:title="Sair do app" />
+        android:title="Perfil"
+        app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/menu_lista_produto_todos_produtos" android:title="Todos produtos" />
+
+    <item
+        android:icon="@drawable/ic_baseline_filter_list_24"
+        android:title="Item"
+        android:visible="true"
+        app:showAsAction="always">
+        <menu>
+            <group
+                android:checkableBehavior="single"
+                android:visible="true">
+                <item
+                    android:id="@+id/menu_lista_produto_ordenar_preco_asc"
+                    android:title="Preço asc" />
+                <item
+                    android:id="@+id/menu_lista_produto_ordenar_preco_desc"
+                    android:title="Preço desc" />
+                <item
+                    android:id="@+id/menu_lista_produto_ordenar_nome_asc"
+                    android:title="Nome asc" />
+                <item
+                    android:id="@+id/menu_lista_produto_ordenar_nome_desc"
+                    android:title="Nome desc" />
+                <item
+                    android:id="@+id/menu_lista_produto_ordenar_nenhum"
+                    android:checked="true"
+                    android:title="Nenhum" />
+            </group>
+        </menu>
+    </item>
 </menu>
