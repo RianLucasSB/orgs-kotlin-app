@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UsuarioDao {
+    @Query("SELECT * from Usuario")
+    fun buscaTodos(): Flow<List<Usuario>>
+
     @Insert
     suspend fun salva(usuario: Usuario)
 
